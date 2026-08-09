@@ -1,5 +1,9 @@
 # ESP32-DIV V2 hardware evidence
 
+> The assembled-unit knowledge base now lives in
+> `docs/hardware/REFERENCE_V2.md`. This file preserves the original Phase 1
+> source/schematic-only audit for historical context.
+
 The canonical target is ESP32-DIV V2 / ESP32-S3. This file deliberately distinguishes
 facts by evidence source. Nothing in this audit was tested on physical hardware.
 

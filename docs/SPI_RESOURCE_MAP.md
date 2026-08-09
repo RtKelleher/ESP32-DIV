@@ -1,5 +1,8 @@
 # V2 SPI and resource audit
 
+> The authoritative assembled-unit resource map now lives in
+> `docs/hardware/RESOURCE_MAP.md`. This file preserves the original Phase 1 audit.
+
 This document records Phase 1 evidence. No SPI manager has been implemented yet.
 
 ## Shared SPI resources

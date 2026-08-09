@@ -1,0 +1,246 @@
+schema_version: 1
+reference:
+  name: "ESP32-DIV V2 assembled reference unit"
+  canonical_target: "ESP32-S3-WROOM-1U N16R8"
+  hardware_revision: "V2 designation; exact PCB revision marking not recorded"
+  upstream_repository: "https://github.com/cifertech/ESP32-DIV"
+  upstream_commit: "9d4d82fe7a12febf554b12e1eca6d434ebe79d39"
+  firmware_version: "v1.7.2"
+  physical_unit_cost_usd_approx: 60
+  runtime_characterized: false
+
+evidence_types:
+  - CONFIRMED_PHYSICAL
+  - CONFIRMED_SCHEMATIC
+  - CONFIRMED_SOURCE
+  - CONFIRMED_RUNTIME
+  - INFERRED
+  - COMMUNITY_REPORT
+  - UNKNOWN
+
+components:
+  esp32:
+    marking: "ESPRESSIF ESP32-S3-WROOM-1U N16R8"
+    expected_identity: "ESP32-S3-WROOM-1U-N16R8"
+    function: "main MCU, Wi-Fi, BLE, native USB"
+    interface: ["native"]
+    power: ["3.3V"]
+    gpio:
+      native_usb_dm: 19
+      native_usb_dp: 20
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SOURCE"]
+    confidence: high
+    runtime_tested: false
+    test_method: null
+    result: "Physical marking recorded; runtime flash and PSRAM sizes not queried."
+    notes: "Schematic/BOM names an N16 module without R8; firmware build enables 16 MB flash and OPI PSRAM."
+
+  usb_uart:
+    marking: "Silicon Labs CP2102N-family"
+    expected_identity: "CP2102N-family USB-to-UART bridge"
+    function: "independent UART0 programming, recovery, and debug path"
+    interface: ["USB", "UART0", "DTR", "RTS"]
+    power: ["USB 5V", "3.3V"]
+    gpio:
+      esp32_uart_rx: "RX0"
+      esp32_uart_tx: "TX0"
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC"]
+    confidence: high
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "Schematic/BOM says CP2102 generically; exact CP2102N suffix is unknown."
+
+  pcf8574:
+    marking: "NXP PCF8574T"
+    expected_identity: "PCF8574T"
+    function: "button/input expansion"
+    interface: ["I2C"]
+    power: ["3.3V"]
+    gpio:
+      sda: 8
+      scl: 9
+      expander_buttons:
+        up: 7
+        down: 5
+        left: 3
+        right: 4
+        select: 6
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: high
+    runtime_tested: false
+    test_method: null
+    result: "Firmware scans addresses 0x20 through 0x27; reference address and physical button mapping not logged."
+    notes: "Expander pin numbers are not ESP32 GPIO numbers."
+
+  power_controller:
+    marking: "IP5306"
+    expected_identity: null
+    function: "battery charging, boost/power path, power-key behavior"
+    interface: ["power", "possible I2C"]
+    power: ["VBUS", "VBAT", "5V", "3.3V logic pull-ups"]
+    gpio:
+      schematic_sda: 8
+      schematic_scl: 9
+      key: "power-key circuit"
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "UNKNOWN"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "Do not infer exact variant or telemetry support from top marking. LED1/LED2 pins are on SCL/SDA nets in the schematic."
+
+  display:
+    marking: "not recorded"
+    expected_identity: "ILI9341-family 2.8 inch 240x320 TFT"
+    function: "primary display"
+    interface: ["SPI"]
+    power: ["3.3V logic", "5V backlight path"]
+    gpio:
+      sclk: 36
+      mosi: 35
+      miso: 37
+      cs: 17
+      dc: 16
+      reset_source: 0
+      backlight: 7
+    evidence: ["CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: "Display is part of a functioning unit, but no formal diagnostic is logged."
+    notes: "Source defines reset GPIO0 while schematic shows the board RESET net; verify."
+
+  touch:
+    marking: "XPT2046-family"
+    expected_identity: "XPT2046-family resistive touch controller"
+    function: "resistive touchscreen sampling"
+    interface: ["SPI"]
+    power: ["3.3V"]
+    gpio:
+      sclk: 36
+      mosi: 35
+      miso: 37
+      cs: 18
+      irq: null
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: high
+    runtime_tested: false
+    test_method: null
+    result: "Operational use observed generally; no calibration/bus diagnostic recorded."
+    notes: "Shares physical TFT signals; source creates a separate HSPI software object."
+
+  storage:
+    marking: "microSD socket; card identity not recorded"
+    expected_identity: null
+    function: "settings, captures, logs, profiles, and firmware-update files"
+    interface: ["SPI"]
+    power: ["3.3V"]
+    gpio:
+      sclk: 12
+      mosi: 11
+      miso: 13
+      cs: 10
+      card_detect: 38
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: high
+    runtime_tested: false
+    test_method: null
+    result: "A 64 GB failure is reported; controlled reproduction and filesystem are not yet logged."
+    notes: "Baseline FatFs has exFAT disabled."
+
+  nrf24_1:
+    marking: "nRF24L01+-class radio; RFX2401C-class front end; 16.000 MHz"
+    expected_identity: "nRF24-class 2.4 GHz module with PA/LNA front end"
+    function: "2.4 GHz radio 1"
+    interface: ["SPI", "CE"]
+    power: ["3.3V"]
+    gpio: {sclk: 12, mosi: 11, miso: 13, csn: 4, ce: 15, irq: null}
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "Authenticity is unknown; characterize the installed module."
+
+  nrf24_2:
+    marking: "nRF24L01+-class radio; RFX2401C-class front end; 16.000 MHz"
+    expected_identity: "nRF24-class 2.4 GHz module with PA/LNA front end"
+    function: "2.4 GHz radio 2"
+    interface: ["SPI", "CE"]
+    power: ["3.3V"]
+    gpio: {sclk: 12, mosi: 11, miso: 13, csn: 48, ce: 47, irq: null}
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "Authenticity is unknown; characterize the installed module."
+
+  nrf24_3:
+    marking: "nRF24L01+-class radio; RFX2401C-class front end; 16.000 MHz"
+    expected_identity: "nRF24-class 2.4 GHz module with PA/LNA front end"
+    function: "2.4 GHz radio 3 and current raw-scanner radio"
+    interface: ["SPI", "CE"]
+    power: ["3.3V"]
+    gpio: {sclk: 12, mosi: 11, miso: 13, csn: 21, ce: 14, irq: null}
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "CSN/CE overlap IR RX/TX. Authenticity is unknown."
+
+  subghz:
+    marking: "AS07-M1101S V3.1"
+    expected_identity: "CC1101-class Sub-GHz module"
+    function: "Sub-GHz receive/transmit"
+    interface: ["SPI", "GDO0", "GDO2"]
+    power: ["3.3V"]
+    gpio: {sclk: 12, mosi: 11, miso: 13, cs: 5, gdo0: 6, gdo2: 3}
+    evidence: ["CONFIRMED_PHYSICAL", "CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "Exact silicon identity and RF behavior require register and receive tests."
+
+  neopixels:
+    marking: "not recorded"
+    expected_identity: "four WS2812B-2020 devices"
+    function: "visual feedback"
+    interface: ["single-wire waveform"]
+    power: ["5V"]
+    gpio: {data: 1}
+    evidence: ["CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: "Firmware setting is stored but no GPIO/LED driver implementation was found."
+    notes: "Physical population and behavior should be recorded."
+
+  infrared:
+    marking: "TSOP1838-class receiver and IR LED design"
+    expected_identity: null
+    function: "infrared receive/transmit"
+    interface: ["GPIO"]
+    power: ["3.3V receiver", "5V transmitter path"]
+    gpio: {rx: 21, tx: 14}
+    evidence: ["CONFIRMED_SCHEMATIC", "CONFIRMED_SOURCE"]
+    confidence: medium
+    runtime_tested: false
+    test_method: null
+    result: null
+    notes: "Pins overlap nRF24 radio 3."
+
+optional_components:
+  pn532:
+    physically_present: false
+    evidence: ["UNKNOWN", "CONFIRMED_SOURCE"]
+    gpio: {sclk: 12, mosi: 13, miso: 11, cs: 5}
+    notes: "Not in base V2 schematic/BOM; source defaults conflict with CC1101 and swap shared data roles."
+  gps:
+    physically_present: false
+    evidence: ["UNKNOWN", "CONFIRMED_SOURCE"]
+    gpio: {rx: 5, tx: 6}
+    notes: "Not in base V2 schematic/BOM; pins conflict with CC1101 CS/GDO0."
